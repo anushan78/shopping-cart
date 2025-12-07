@@ -2,15 +2,23 @@ import { CartItem, createCartItem } from "../models/CartItem";
 import { Product } from "../models/Product";
 import { IPriceService } from "./IPriceService";
 import { config } from "../config";
+import { IDiscountService } from "./IDiscountService";
 
 export class ShoppingCartService {
   private items: CartItem[] = [];
   private readonly TAX_RATE = config.taxRate;
 
-  constructor(private priceService: IPriceService) {}
+  constructor(
+    private priceService: IPriceService,
+    private discountService: IDiscountService
+  ) {}
 
   async addProduct(productName: string, quantity: number): Promise<void> {
     const price = await this.priceService.getPrice(productName);
+    const discountedPrice = this.discountService.getDiscountedPrice(
+      productName,
+      price
+    );
     const existingItem = this.items.find(
       (item) => item.product.name === productName
     );
@@ -18,10 +26,10 @@ export class ShoppingCartService {
     if (existingItem) {
       existingItem.quantity += quantity;
       existingItem.totalPrice = parseFloat(
-        (existingItem.product.price * existingItem.quantity).toFixed(2)
+        (discountedPrice * existingItem.quantity).toFixed(2)
       );
     } else {
-      const product: Product = { name: productName, price };
+      const product: Product = { name: productName, price: discountedPrice };
       const newItem = createCartItem(product, quantity);
       this.items.push(newItem);
     }
