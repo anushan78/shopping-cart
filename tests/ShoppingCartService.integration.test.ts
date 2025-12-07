@@ -1,15 +1,22 @@
 import { ShoppingCartService } from "../src/services/ShoppingCartService";
 import { PriceService } from "../src/services/PriceService";
+import { DiscountService } from "../src/services/DiscountService";
 
 describe("ShoppingCartService Integration Tests", () => {
   jest.setTimeout(15000);
 
   let priceService: PriceService;
+  let discountService: DiscountService;
   let shoppingCartService: ShoppingCartService;
 
   beforeAll(() => {
     priceService = new PriceService();
-    shoppingCartService = new ShoppingCartService(priceService);
+    discountService = new DiscountService();
+
+    shoppingCartService = new ShoppingCartService(
+      priceService,
+      discountService
+    );
   });
 
   it("should calculate totals with real prices from API", async () => {
@@ -24,7 +31,7 @@ describe("ShoppingCartService Integration Tests", () => {
 
     const total = await shoppingCartService.getTotal();
     console.log("Total is : ", total);
-    expect(total).toEqual(97.22);
+    expect(total).toEqual(88.22);
   });
 
   it("should calculate subtotal, tax and total with real prices from API", async () => {
@@ -39,8 +46,8 @@ describe("ShoppingCartService Integration Tests", () => {
 
     console.log(`Subtotal: ${subtotal}, Tax: ${tax}, Total: ${total}`);
 
-    expect(subtotal).toEqual(15.02);
-    expect(tax).toEqual(1.88);
-    expect(total).toEqual(16.9);
+    expect(subtotal).toEqual(12.52);
+    expect(tax).toEqual(1.56);
+    expect(total).toEqual(14.08);
   });
 });
